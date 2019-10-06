@@ -59,6 +59,12 @@ class Logger implements \Psr\Log\LoggerInterface
     private $stdout;
 
     /**
+     * Hook that called after output a log.
+     * @var Closure
+     */
+    private $postHook = null;
+
+    /**
      * Log fields separated by tabs to form a TSV (CSV with tabs).
      */
     const TAB = "\t";
@@ -131,6 +137,16 @@ class Logger implements \Psr\Log\LoggerInterface
     public function setOutput(bool $stdout)
     {
         $this->stdout = $stdout;
+    }
+
+    /**
+     * Set the hook that called after output a log.
+     *
+     * @param \Closure $postHook
+     */
+    public function setPostHook(\Closure $postHook)
+    {
+        $this->postHook = $postHook;
     }
 
     /**
@@ -296,6 +312,11 @@ class Logger implements \Psr\Log\LoggerInterface
         // Log to stdout if option set to do so.
         if ($this->stdout) {
             print($log_line);
+        }
+
+        // Log to post hook if option set to do so.
+        if ($this->postHook) {
+            $this->postHook->call($this, $log_line);
         }
     }
 

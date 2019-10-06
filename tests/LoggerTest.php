@@ -250,6 +250,22 @@ class LoggerTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @testCase Data context array shows up as a JSON string.
+     */
+    public function testPostHook()
+    {
+        // When
+        $log_line_from_hook = null;
+        $this->logger->setPostHook(function($log_line) use (&$log_line_from_hook) {
+            $log_line_from_hook = $log_line;
+        });
+        $this->logger->info(self::TEST_MESSAGE, ['key1' => 'value1', 'key2' => 6]);
+
+        // Then
+        $this->assertTrue((bool) preg_match('/\s{"key1":"value1","key2":6}\s/', $log_line_from_hook));
+    }
+
+    /**
      * @testCase Logging an exception
      */
     public function testExceptionTextWhenLoggingErrorWithExceptionData()
@@ -400,7 +416,7 @@ class LoggerTest extends \PHPUnit\Framework\TestCase
         // When
         $this->logger->info('TestMessage');
     }
- 
+
     /**
      * @testCase Time should be in YYYY-MM-DD HH:mm:SS.uuuuuu format.
      * @throws   \Exception
